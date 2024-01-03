@@ -89,13 +89,13 @@ class Action:
         """Get the inputs for this action."""
         return self.input
 
-    def start(self) -> None:
+    async def start(self) -> None:
         '''
         Start performing the action.
         '''
         self.status = 'pending'
         self.thing.action_notify(self)
-        self.perform_action()
+        await self.perform_action()
         self.finish()
 
     def cancel(self) -> None:
@@ -109,7 +109,7 @@ class Action:
         Finish performing the action.
         '''
         self.status = 'completed'
-        self.time_completed = timestamp()
+        self.time_completed = webthing.utils.timestamp()
         self.thing.action_notify(self)
 
     def perform_action(self) -> None:

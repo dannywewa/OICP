@@ -18,6 +18,8 @@ import time
 import uuid
 import asyncio
 
+from plugins.vmb_camera.api import VmbCamera
+
 app = FastAPI()
 
 html = """
@@ -66,7 +68,7 @@ class FadeAction(Action):
         Action.__init__(self, uuid.uuid4().hex, thing, 'fade', input_=input_)
 
     def perform_action(self):
-        time.sleep(self.input['duration'] / 1000)
+        time.sleep(self.input['duration'] / 500)
         self.thing.set_property('brightness', self.input['brightness'])
         self.thing.add_event(OverheatedEvent(self.thing, 102))
         if ws is not None:
@@ -74,72 +76,143 @@ class FadeAction(Action):
 
         print('action done internally')
 
-thing = Thing(
-    'urn:dev:ops:my-lamp-1234',
-    'My Lamp',
-    ['OnOffSwitch', 'Light'],
-    'A web connected lamp',
-)
-thing.add_property(
-    Property(thing,
-                'on',
-                Value(True),
-                metadata={
-                    '@type': 'OnOffProperty',
-                    'title': 'On/Off',
-                    'type': 'boolean',
-                    'description': 'Whether the lamp is turned on',
-                }))
-thing.add_property(
-    Property(thing,
-                'brightness',
-                Value(50),
-                metadata={
-                    '@type': 'BrightnessProperty',
-                    'title': 'Brightness',
-                    'type': 'integer',
-                    'description': 'The level of light from 0-100',
-                    'minimum': 0,
-                    'maximum': 100,
-                    'unit': 'percent',
-                }))
+class CaptureAction(Action):
+    def __init__(self, thing, input_):
+        Action.__init__(self, uuid.uuid4().hex, thing, 'capture', input_=input_)
 
-thing.add_available_action(
-    'fade',
-    {
-        'title': 'Fade',
-        'description': 'Fade the lamp to a given level',
-        'input': {
-            'type': 'object',
-            'required': [
-                'brightness',
-                'duration',
-            ],
-            'properties': {
-                'brightness': {
-                    'type': 'integer',
-                    'minimum': 0,
-                    'maximum': 100,
-                    'unit': 'percent',
-                },
-                'duration': {
-                    'type': 'integer',
-                    'minimum': 1,
-                    'unit': 'milliseconds',
+    async def perform_action(self):
+        print(f'action: id={self.id}, name={self.name}')
+        await self.thing.camera.capture(self.id)
+
+class ArmAction(Action):
+    def __init__(self, thing, input_):
+        Action.__init__(self, uuid.uuid4().hex, thing, 'arm', input_=input_)
+
+    async def perform_action(self):
+        print(f'action: id={self.id}, name={self.name}')
+        await self.thing.camera.arm()
+
+class DisarmAction(Action):
+    def __init__(self, thing, input_):
+        Action.__init__(self, uuid.uuid4().hex, thing, 'disarm', input_=input_)
+
+    async def perform_action(self):
+        print(f'action: id={self.id}, name={self.name}')
+        await self.thing.camera.disarm()
+
+class MyThing(Thing):
+    def __init__(self):
+        super().__init__(
+            'urn:dev:ops:my-lamp-1234',
+            'My Lamp',
+            ['OnOffSwitch', 'Light'],
+            'A web connected lamp',
+        )
+
+        self.camera = VmbCamera()
+
+        self.add_property(
+            Property(self,
+                    'on',
+                    Value(True),
+                    metadata={
+                        '@type': 'OnOffProperty',
+                        'title': 'On/Off',
+                        'type': 'boolean',
+                        'description': 'Whether the lamp is turned on',
+                    }))
+        self.add_property(
+            Property(self,
+                    'brightness',
+                    Value(50),
+                    metadata={
+                        '@type': 'BrightnessProperty',
+                        'title': 'Brightness',
+                        'type': 'integer',
+                        'description': 'The level of light from 0-100',
+                        'minimum': 0,
+                        'maximum': 100,
+                        'unit': 'percent',
+                    }))
+
+        self.add_available_action(
+            'fade',
+            {
+                'title': 'Fade',
+                'description': 'Fade the lamp to a given level',
+                'input': {
+                    'type': 'object',
+                    'required': [
+                        'brightness',
+                        'duration',
+                    ],
+                    'properties': {
+                        'brightness': {
+                            'type': 'integer',
+                            'minimum': 0,
+                            'maximum': 100,
+                            'unit': 'percent',
+                        },
+                        'duration': {
+                            'type': 'integer',
+                            'minimum': 1,
+                            'unit': 'milliseconds',
+                        },
+                    },
                 },
             },
-        },
-    },
-    FadeAction)
+            FadeAction)
 
-thing.add_available_event(
-    'overheated',
-    {
-        'description':
-        'The lamp has exceeded its safe operating temperature',
-        'type': 'number',
-        'unit': 'degree celsius',
-    })
+        self.add_available_action(
+            'arm',
+            {
+                'title': 'Arm',
+            },
+            ArmAction,
+        )
+
+        self.add_available_action(
+            'disarm',
+            {
+                'title': 'Disarm',
+            },
+            DisarmAction,
+        )
+
+        self.add_available_action(
+            'capture',
+            {
+                'title': 'Capture',
+                'input': {
+                    'type': 'object',
+                    'required': [
+                        'integration time'
+                    ],
+                    'properties': {
+                        'integration time': {
+                            'type': 'integer',
+                            'minimum': 0,
+                            'maximum': 1000000,
+                            'unit': 'us',
+                        }
+                    }
+                }
+            },
+            CaptureAction,
+        )
+
+        self.add_available_event(
+            'overheated',
+            {
+                'description':
+                'The lamp has exceeded its safe operating temperature',
+                'type': 'number',
+                'unit': 'degree celsius',
+            })
+
+
+thing = MyThing()
+
 ws = None
 
 @app.get('/')
@@ -181,13 +254,21 @@ async def get_action_by_name_id(action_name: str, action_id: str):
     action = thing.get_action(action_name, action_id)
     return action.as_action_description()
 
-@app.post('/actions')
-async def post_actions():
-    input = {"brightness": 44, "duration": 1000}
-    action = thing.perform_action('fade', input)
-    response = action.as_action_description()
+@app.post('/actions/{action_name}')
+async def post_actions(action_name: str):
+    if action_name == 'capture':
+        input = {'integration time': 1000}
+        action = thing.perform_action('capture', input)
+        response = action.as_action_description()
+    elif action_name == 'arm':
+        action = thing.perform_action('arm')
+        response = action.as_action_description()
+    elif action_name == 'disarm':
+        action = thing.perform_action('disarm')
+        response = action.as_action_description()
 
-    asyncio.get_event_loop().run_in_executor(None, action.start)
+    # asyncio.get_event_loop().run_in_executor(None, action.start)
+    asyncio.create_task(action.start())
 
     return response
 
