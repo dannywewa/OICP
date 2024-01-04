@@ -1,4 +1,3 @@
-import webthing
 
 
 class SingleThing:
@@ -20,7 +19,8 @@ class SingleThing:
     def get_name(self):
         """Get the mDNS server name."""
         return self.thing.title
-    
+
+
 class MultipleThings:
     """A container for multiple things."""
 

@@ -3,15 +3,19 @@
 import webthing
 from typing import Any, Dict
 
+
 class Event:
     '''
     An Event represents an individual event from a thing.
     '''
 
-    def __init__(self, thing: webthing.thing.Thing, name: str, data: Any | None = None):
+    def __init__(self,
+                 thing: webthing.thing.Thing,
+                 name: str,
+                 data: Any | None = None):
         '''
         Initialize the object.
-        
+
         '''
         self.thing = thing
         self.name = name

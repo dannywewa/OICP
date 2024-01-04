@@ -4,18 +4,20 @@ import datetime
 import ifaddr
 import socket
 
+
 def timestamp() -> str:
     '''
     Get the current time.
-    
+
     Returns the current time in the form YYYY-mm-ddTHH:MM:SS+00:00
     '''
     return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')
 
+
 def get_ip():
     '''
     Get the default local IP address.
-    
+
     From: https://stackoverflow.com/a/28950776
     '''
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -29,10 +31,11 @@ def get_ip():
 
     return ip
 
+
 def get_addresses():
     '''
     Get all IP addresses.
-    
+
     Returns a list of addresses.
     '''
     addresses = set()
@@ -49,7 +52,7 @@ def get_addresses():
                 # Sometimes, IPv6 addresses will have the interface name
                 # appended. e.g. %eth0. Handle that.
                 ip = addr.ip[0].split('%')[0].lower()
-                    
+
                 if not ip.startswith('fe80:'):
                     addresses.add('[{}]'.format(ip))
 

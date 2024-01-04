@@ -27,7 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import sys
 from typing import Optional
 
-from vmbpy import *
+from vmbpy import VmbSystem, VmbCameraError, Camera, VmbFeatureError, PersistType  # type: ignore
 
 
 def print_preamble():

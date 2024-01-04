@@ -28,7 +28,22 @@ import sys
 from typing import Optional
 from queue import Queue
 
-from vmbpy import *
+from vmbpy import (  # type: ignore
+    VmbSystem,
+    VmbCameraError,
+    Camera,
+    VmbFeatureError,
+    Stream,
+    Frame,
+    FeatureContainer,
+    Log,
+    FrameStatus,
+    CameraEvent,
+    PixelFormat,
+    COLOR_PIXEL_FORMATS,
+    intersect_pixel_formats,
+    MONO_PIXEL_FORMATS,
+)
 
 
 # All frames will either be recorded in this format, or transformed to it before being displayed

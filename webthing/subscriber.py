@@ -1,6 +1,5 @@
 '''High-level Subscriber base class implementation.'''
 
-import webthing
 
 class Subscriber:
     """Abstract Subscriber class."""

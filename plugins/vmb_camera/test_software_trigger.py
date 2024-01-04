@@ -1,11 +1,15 @@
 # Software trigger for continuous image acquisition
 
 import time
-from vmbpy import VmbSystem
+from vmbpy import (  # type: ignore
+    VmbSystem,
+)
+
 
 def handler(cam, stream, frame):
     print('Frame acquired: {}'.format(frame), flush=True)
     cam.queue_frame(frame)
+
 
 def main():
     with VmbSystem.get_instance() as vmb:
@@ -22,10 +26,11 @@ def main():
                 for i in range(200):
                     time.sleep(0.03)
                     camera.TriggerSoftware.run()
-            except Exception:
+            except Exception as e:
                 print(e)
             finally:
                 camera.stop_streaming()
+
 
 if __name__ == '__main__':
     main()

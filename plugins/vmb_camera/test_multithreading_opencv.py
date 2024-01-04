@@ -32,7 +32,19 @@ from typing import Optional
 import cv2
 import numpy
 
-from vmbpy import *
+from vmbpy import (  # type: ignore
+    VmbSystem,
+    VmbCameraError,
+    Camera,
+    VmbFeatureError,
+    Stream,
+    Frame,
+    Log,
+    FrameStatus,
+    CameraEvent,
+    PixelFormat,
+    LOG_CONFIG_INFO_CONSOLE_ONLY,
+)
 
 FRAME_QUEUE_SIZE = 10
 FRAME_HEIGHT = 480

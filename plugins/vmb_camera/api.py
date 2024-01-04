@@ -1,15 +1,22 @@
 import cv2
-import vmbpy
-from vmbpy import *
+from vmbpy import (  # type: ignore
+    VmbSystem,
+    Camera,
+    Frame,
+    Stream,
+    FrameStatus,
+    PixelFormat
+)
 import asyncio
-import time
-from enum import Enum, StrEnum, auto
+from enum import StrEnum, auto
 from pyee import EventEmitter
 
+
 class PxielFormat(StrEnum):
-    Mono8 =  auto()
+    Mono8 = auto()
     Mono10 = auto()
     Mono12 = auto()
+
 
 class BinningMode(StrEnum):
     Sum = auto()
@@ -25,12 +32,14 @@ class TriggerSource(StrEnum):
     Line3 = auto()
     Line4 = auto()
 
+
 class TriggerActivation(StrEnum):
     RisingEdge = auto()
     FallingEdge = auto()
     AnyEdge = auto()
     LevelHigh = auto()
     LevelLow = auto()
+
 
 class CameraStatus(StrEnum):
     Connected = auto()
@@ -39,9 +48,11 @@ class CameraStatus(StrEnum):
     Capturing = auto()
     Acquiring = auto()
 
+
 class CameraEventType(StrEnum):
     FrameReady = auto()
     StatusChanged = auto()
+
 
 class CameraBase(EventEmitter):
     def __init__(self):
@@ -142,6 +153,7 @@ class VmbCameraBase:
     def get_integration_time(self):
         pass
 
+
 class VmbCamera(VmbCameraBase):
     def __init__(self, *args):
         super().__init__(self, *args)
@@ -154,17 +166,20 @@ class VmbCamera(VmbCameraBase):
         self.vmb.register_camera_change_handler(self.camera_changed)
         self.vmb.register_interface_change_handler(self.interface_changed)
 
+        self.cam: Camera
+
     def camera_changed(self, dev, state):
         print(dev, state)
 
     def interface_changed(self, dev, state):
         print(dev, state)
 
-    def handler(self, cam, stream, frame):
-        img = frame.as_numpy_ndarray()
-        cv2.imwrite(f'capture_{self.id}.png', img)
+    def handler(self, cam: Camera, stream: Stream, frame: Frame):
+        if frame.get_status() == FrameStatus.Complete:
+            img = frame.as_numpy_ndarray()
+            cv2.imwrite(f'capture_{self.id}.png', img)
+            self.image_ready_evt.set()
         cam.queue_frame(frame)
-        self.image_ready_evt.set()
 
     async def open_task(self):
         with self.vmb:
@@ -185,7 +200,6 @@ class VmbCamera(VmbCameraBase):
         self.closed_evt.set()
         print('closing')
 
-
     async def arm_task(self, input=None):
         with self.cam as cam:
             print('arming software triggering')
@@ -198,7 +212,7 @@ class VmbCamera(VmbCameraBase):
             cam.AcquisitionMode.set('Continuous')
 
             try:
-                s = cam.start_streaming(self.handler)
+                cam.start_streaming(self.handler)
                 print('armed software triggering')
                 await self.disarm_evt.wait()
             finally:
@@ -209,20 +223,19 @@ class VmbCamera(VmbCameraBase):
     async def arm_swtrigger(self, input=None):
         asyncio.create_task(self.arm_task(input))
 
-
     async def disarm_swtrigger(self):
         self.disarm_evt.set()
         print('disarming software triggering')
 
     async def capture0(self, id):
         self.id = id
-        with self.c as c:
+        with self.cam as c:
             f = c.get_frame()
             print(f)
-            
+
     async def capture(self, id):
         self.id = id
-        with self.c as c:
+        with self.cam as c:
             c.TriggerSoftware.run()
 
     async def capture_swtrigger(self, id):
@@ -230,7 +243,6 @@ class VmbCamera(VmbCameraBase):
         Software triggering
         '''
         self.id = id
-        s0 = time.time()
         with self.cam as cam:
 
             try:
@@ -238,6 +250,5 @@ class VmbCamera(VmbCameraBase):
             except Exception:
                 pass
 
-
     async def set_integration_time(self, integration_time: int):
-        self.c.ExposureTime.set(integration_time)
+        self.cam.ExposureTime.set(integration_time)

@@ -3,15 +3,20 @@
 import webthing
 from typing import Dict
 
+
 class Action:
     '''
     An Action represents an individual action on a Thing.
     '''
 
-    def __init__(self, id_: str, thing: webthing.thing.Thing, name: str, input_: Dict):
+    def __init__(self,
+                 id_: str,
+                 thing: webthing.thing.Thing,
+                 name: str,
+                 input_: Dict):
         '''
         Initialize the object.
-        
+
         id_ -- ID of this action.
         thing -- the Thing this action belongs to
         name -- name of the action
@@ -25,12 +30,12 @@ class Action:
         self.href = '/actions/{}/{}'.format(self.name, self.id)
         self.status = 'created'
         self.time_requested = webthing.utils.timestamp()
-        self.time_completed = None
+        self.time_completed: str = ''
 
     def as_action_description(self) -> Dict:
         '''
         Get the action description.
-        
+
         Returns a disctionary describing the action.
         '''
         description = {
@@ -48,7 +53,7 @@ class Action:
             description[self.name]['timeCompleted'] = self.time_completed
 
         return description
-    
+
     def set_href_prefix(self, prefix) -> None:
         """
         Set the prefix of any hrefs associated with this action.
@@ -81,7 +86,7 @@ class Action:
         """Get the time the action was requested."""
         return self.time_requested
 
-    def get_time_completed(self) -> str:
+    def get_time_completed(self) -> str | None:
         """Get the time the action was completed."""
         return self.time_completed
 

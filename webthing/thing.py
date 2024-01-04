@@ -1,14 +1,18 @@
 """High-level Thing base class implementation."""
-import jsonschema
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-from typing import List, Dict, Any, Set
+from typing import List, Dict, Set
 import webthing
+
 
 class Thing:
     """A Web Thing."""
 
-    def __init__(self, id_: str, title: str, type_: List[str]=[], description=''):
+    def __init__(self,
+                 id_: str,
+                 title: str,
+                 type_: List[str] = [],
+                 description: str = ''):
         """
         Initialize the object.
 

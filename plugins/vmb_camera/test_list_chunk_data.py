@@ -25,9 +25,17 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import sys
-from typing import Optional
+from typing import Optional, List, Any
 
-from vmbpy import *
+from vmbpy import (  # type: ignore
+    VmbSystem,
+    VmbCameraError,
+    Camera,
+    VmbFeatureError,
+    Stream,
+    Frame,
+    FeatureContainer
+)
 
 
 def print_preamble():
@@ -89,8 +97,8 @@ def get_camera(camera_id: Optional[str]) -> Camera:
 
 class ChunkExample:
     def __init__(self, cam: Camera) -> None:
-        self.cam = cam
-        self.enabled_chunk_selectors = []
+        self.cam: Camera = cam
+        self.enabled_chunk_selectors: List[Any] = []
 
     def run(self):
         with self.cam:

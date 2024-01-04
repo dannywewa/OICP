@@ -27,7 +27,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import sys
 from typing import Optional, Tuple
 
-from vmbpy import *
+from vmbpy import (  # type: ignore
+    VmbSystem,
+    VmbCameraError,
+    Camera,
+    VmbFeatureError,
+    Stream,
+    Frame,
+    FeatureContainer,
+    Log,
+    FrameStatus,
+    CameraEvent,
+    AllocationMode,
+)
 
 
 def print_preamble():
