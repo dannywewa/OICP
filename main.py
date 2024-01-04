@@ -82,7 +82,24 @@ class CaptureAction(Action):
 
     async def perform_action(self):
         print(f'action: id={self.id}, name={self.name}')
-        await self.thing.camera.capture(self.id)
+        await self.thing.camera.capture_swtrigger(self.id)
+
+class OpenAction(Action):
+    def __init__(self, thing, input_):
+        Action.__init__(self, uuid.uuid4().hex, thing, 'open', input_=input_)
+
+    async def perform_action(self):
+        print(f'action: id={self.id}, name={self.name}')
+        await self.thing.camera.open()
+
+class CloseAction(Action):
+    def __init__(self, thing, input_):
+        Action.__init__(self, uuid.uuid4().hex, thing, 'close', input_=input_)
+
+    async def perform_action(self):
+        print(f'action: id={self.id}, name={self.name}')
+        await self.thing.camera.close()
+
 
 class ArmAction(Action):
     def __init__(self, thing, input_):
@@ -90,7 +107,7 @@ class ArmAction(Action):
 
     async def perform_action(self):
         print(f'action: id={self.id}, name={self.name}')
-        await self.thing.camera.arm()
+        await self.thing.camera.arm_swtrigger(self.input)
 
 class DisarmAction(Action):
     def __init__(self, thing, input_):
@@ -98,7 +115,7 @@ class DisarmAction(Action):
 
     async def perform_action(self):
         print(f'action: id={self.id}, name={self.name}')
-        await self.thing.camera.disarm()
+        await self.thing.camera.disarm_swtrigger()
 
 class MyThing(Thing):
     def __init__(self):
@@ -162,11 +179,46 @@ class MyThing(Thing):
                 },
             },
             FadeAction)
+        
+        self.add_available_action(
+            'open',
+            {
+                'title': 'Open',
+            },
+            OpenAction,
+        )
+
+        self.add_available_action(
+            'close',
+            {
+                'title': 'Close',
+            },
+            CloseAction,
+        )
+
 
         self.add_available_action(
             'arm',
             {
                 'title': 'Arm',
+                'description': 'Arm the camera for capturing.',
+                'input': {
+                    'type': 'object',
+                    'required': [
+                        'exposure_mode',
+                        'exposure_time_hint',
+                    ],
+                    'properties': {
+                        'exposure_mode': {
+                            'type': 'string',
+                        },
+                        'exposure_time_hint': {
+                            'type': 'integer',
+                            'minimum': 0,
+                            'unit': 'microseconds',
+                        },
+                    },
+                },
             },
             ArmAction,
         )
@@ -255,16 +307,9 @@ async def get_action_by_name_id(action_name: str, action_id: str):
     return action.as_action_description()
 
 @app.post('/actions/{action_name}')
-async def post_actions(action_name: str):
-    if action_name == 'capture':
-        input = {'integration time': 1000}
-        action = thing.perform_action('capture', input)
-        response = action.as_action_description()
-    elif action_name == 'arm':
-        action = thing.perform_action('arm')
-        response = action.as_action_description()
-    elif action_name == 'disarm':
-        action = thing.perform_action('disarm')
+async def post_actions(action_name: str, input: dict | None = None):
+    if action_name in ['capture', 'arm', 'disarm', 'open', 'close']:
+        action = thing.perform_action(action_name, input)
         response = action.as_action_description()
 
     # asyncio.get_event_loop().run_in_executor(None, action.start)

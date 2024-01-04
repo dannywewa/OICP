@@ -10,7 +10,7 @@ def timestamp() -> str:
     
     Returns the current time in the form YYYY-mm-ddTHH:MM:SS+00:00
     '''
-    return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')
+    return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')
 
 def get_ip():
     '''
