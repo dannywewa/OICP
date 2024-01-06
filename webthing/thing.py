@@ -335,7 +335,7 @@ class Thing:
             'subscribers': set(),
         }
 
-    def perform_action(self, action_name, input_=None):
+    def create_action(self, action_name, input_=None):
         """
         Perform an action on the thing.
 

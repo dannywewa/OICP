@@ -2,9 +2,12 @@
 
 import webthing
 from typing import Dict
+from abc import ABC, abstractmethod
 
+import asyncio
+from asyncio import Task
 
-class Action:
+class Action(ABC):
     '''
     An Action represents an individual action on a Thing.
     '''
@@ -94,14 +97,19 @@ class Action:
         """Get the inputs for this action."""
         return self.input
 
-    async def start(self) -> None:
+    def start(self) -> Task:
         '''
         Start performing the action.
         '''
-        self.status = 'pending'
-        self.thing.action_notify(self)
-        await self.perform_action()
-        self.finish()
+        async def action_task():
+            self.status = 'pending'
+            self.thing.action_notify(self)
+            await self.perform_action()
+            self.finish()
+
+        task = asyncio.create_task(action_task())
+
+        return task
 
     def cancel(self) -> None:
         '''
@@ -117,8 +125,9 @@ class Action:
         self.time_completed = webthing.utils.timestamp()
         self.thing.action_notify(self)
 
-    def perform_action(self) -> None:
+    @abstractmethod
+    async def perform_action(self) -> None:
         '''
         Override this with the code necessary to perform the action
         '''
-        pass
+        await self._perform_action()

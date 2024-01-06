@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import HTMLResponse
+import webthing
 from webthing import (
     Value,
     Thing,
@@ -17,7 +18,7 @@ import logging
 import time
 import uuid
 import asyncio
-
+from typing import Dict
 from plugins.vmb_camera.api import VmbCamera
 
 app = FastAPI()
@@ -64,10 +65,10 @@ class OverheatedEvent(Event):
 
 class FadeAction(Action):
 
-    def __init__(self, thing, input_):
-        Action.__init__(self, uuid.uuid4().hex, thing, 'fade', input_=input_)
+    def __init__(self, thing: webthing.thing.Thing, input_: Dict):
+        Action.__init__(self, uuid.uuid4().hex, thing, 'fade', input_ = input_)
 
-    def perform_action(self):
+    async def _perform_action(self):
         time.sleep(self.input['duration'] / 500)
         self.thing.set_property('brightness', self.input['brightness'])
         self.thing.add_event(OverheatedEvent(self.thing, 102))
@@ -344,11 +345,17 @@ async def get_action_by_name_id(action_name: str, action_id: str):
 @app.post('/actions/{action_name}')
 async def post_actions(action_name: str, input: dict | None = None):
     if action_name in ['capture', 'init', 'deinit', 'arm', 'disarm', 'open', 'close']:
-        action = thing.perform_action(action_name, input)
+        action = thing.create_action(action_name, input)
         response = action.as_action_description()
 
     # asyncio.get_event_loop().run_in_executor(None, action.start)
-    asyncio.create_task(action.start())
+    # asyncio.create_task(action.start())
+    def cb(f):
+        print(f)
+
+    task = action.start()
+    task.add_done_callback(cb)
+    print(task)
 
     return response
 
