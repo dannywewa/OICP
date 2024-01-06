@@ -82,7 +82,26 @@ class CaptureAction(Action):
 
     async def perform_action(self):
         print(f'action: id={self.id}, name={self.name}')
-        await self.thing.camera.capture_swtrigger(self.id)
+        await self.thing.camera.capture_swtrigger(self.id, self.input['integration time'])
+
+
+class InitAction(Action):
+    def __init__(self, thing, input_):
+        Action.__init__(self, uuid.uuid4().hex, thing, 'init', input_=input_)
+
+    async def perform_action(self):
+        print(f'action: id={self.id}, name={self.name}')
+        await self.thing.camera.init()
+
+
+class DeinitAction(Action):
+    def __init__(self, thing, input_):
+        Action.__init__(self, uuid.uuid4().hex, thing, 'deinit', input_=input_)
+
+    async def perform_action(self):
+        print(f'action: id={self.id}, name={self.name}')
+        await self.thing.camera.deinit()
+
 
 class OpenAction(Action):
     def __init__(self, thing, input_):
@@ -179,7 +198,23 @@ class MyThing(Thing):
                 },
             },
             FadeAction)
-        
+
+        self.add_available_action(
+            'init',
+            {
+                'title': 'Init',
+            },
+            InitAction,
+        )
+
+        self.add_available_action(
+            'deinit',
+            {
+                'title': 'Deinit',
+            },
+            DeinitAction,
+        )
+
         self.add_available_action(
             'open',
             {
@@ -308,7 +343,7 @@ async def get_action_by_name_id(action_name: str, action_id: str):
 
 @app.post('/actions/{action_name}')
 async def post_actions(action_name: str, input: dict | None = None):
-    if action_name in ['capture', 'arm', 'disarm', 'open', 'close']:
+    if action_name in ['capture', 'init', 'deinit', 'arm', 'disarm', 'open', 'close']:
         action = thing.perform_action(action_name, input)
         response = action.as_action_description()
 
