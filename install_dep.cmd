@@ -11,7 +11,7 @@ pip install iniconfig
 pip install matplotlib
 pip install "fastapi[all]"
 pip install "uvicorn[standard]"
-pip install "C:/Program Files/Allied Vision/Vimba X/api/python/vmbpy-1.0.3-py3-none-any.whl"
+pip install "C:/Program Files/Allied Vision/Vimba X/api/python/vmbpy-1.0.4-py3-none-any.whl"
 
 pip install pillow
 
