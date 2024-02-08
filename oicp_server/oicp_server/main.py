@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .router import router
 from .settings import get_settings
+from .service import initialize_logging
 from .hardware import initialize_hardware, cleanup_hardware
 
 __version__ = '0.0.1'
@@ -20,7 +21,7 @@ def startup() -> None:
     '''Handle app startup'''
 
     settings = get_settings()
-    # initialize_logging()
+    initialize_logging()
     # initialize_task_runner()
     # initialize_front_panel()
     initialize_hardware()

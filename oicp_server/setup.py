@@ -39,7 +39,7 @@ INSTALL_REQUIRES = [
     "typing-extensions",
     "uvicorn",
     "wsproto",
-    # "systemd-python==234; sys_platform=='linux'",
+    "systemd-python==235; sys_platform=='linux'",
     "sqlalchemy",
     "aiosqlite",
     "paho-mqtt",
