@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7fef0404b639563f9ed4d481bcfed3bb605f7a66b5e2ec6aab6a82d2443b7521"
+            "sha256": "6e6f6ae45e0f1e130fca0d94d2a7053ca3735cbde546f3f4659d4d3d23941e1a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -141,6 +141,10 @@
             "editable": true,
             "path": "./oicp_server"
         },
+        "opentrons-hardware": {
+            "editable": true,
+            "path": "./oicp_hardware"
+        },
         "paho-mqtt": {
             "hashes": [
                 "sha256:2a8291c81623aec00372b5a85558a372c747cbca8e9934dfe218638b8eefc26f"
@@ -247,6 +251,13 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==2.1.0"
+        },
+        "pyserial": {
+            "hashes": [
+                "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb",
+                "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"
+            ],
+            "version": "==3.5"
         },
         "python-dotenv": {
             "hashes": [
