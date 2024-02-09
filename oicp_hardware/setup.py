@@ -12,11 +12,11 @@ sys.path.append(os.path.join(HERE, "..", "scripts"))
 
 VERSION = '0.1'
 
-DISTNAME = "opentrons_hardware"
-LICENSE = "Apache 2.0"
-AUTHOR = "Opentrons"
-EMAIL = "engineering@opentrons.com"
-URL = "https://github.com/Opentrons/opentrons"
+DISTNAME = "oicp_hardware"
+LICENSE = ""
+AUTHOR = ""
+EMAIL = ""
+URL = ""
 DOWNLOAD_URL = ""
 CLASSIFIERS = [
     "Development Status :: 5 - Production/Stable",
@@ -25,14 +25,18 @@ CLASSIFIERS = [
     "Intended Audience :: Science/Research",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering",
 ]
 KEYWORDS = ["robots", "protocols", "synbio", "pcr", "automation", "lab"]
-DESCRIPTION = "Hardware control for Opentrons Robots."
+DESCRIPTION = "Hardware control for OICP."
 PACKAGES = find_packages(where=".", exclude=["tests.*", "tests"])
 INSTALL_REQUIRES = [
+    "numpy",
+    "opencv-python",
     "pyserial==3.5",
+    "pyee",
+    "pypylon",
     # f"opentrons_shared_data=={VERSION}",
 ]
 

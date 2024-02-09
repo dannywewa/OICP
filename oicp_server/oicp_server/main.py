@@ -3,6 +3,8 @@ import logging
 from typing import Optional
 from contextlib import asynccontextmanager
 
+import signal
+import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,26 +19,28 @@ exception_handlers = None
 log = logging.getLogger(__name__)
 
 
-def startup() -> None:
+def startup(app: FastAPI) -> None:
     '''Handle app startup'''
 
+    print('startup')
     settings = get_settings()
     initialize_logging()
     # initialize_task_runner()
     # initialize_front_panel()
-    initialize_hardware()
+    initialize_hardware(app.state)
     # initialize_persistence()
     # initialize_notification()
 
     pass
 
 
-def shutdown():
+def shutdown(app: FastAPI):
     '''Handle app shutdown'''
 
+    print('shutdown')
     # cleanup_notification()
     # cleanup_persistence()
-    cleanup_hardware()
+    cleanup_hardware(app.state)
     # cleanup_front_panel()
     # cleanup_task_runner()
 
@@ -45,9 +49,9 @@ def shutdown():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    startup()
+    startup(app)
     yield
-    shutdown()
+    shutdown(app)
 
 
 app = FastAPI(
@@ -57,6 +61,18 @@ app = FastAPI(
     lifespan=lifespan,
     exception_handlers=exception_handlers
 )
+
+
+# Define the signal handler function
+def graceful_shutdown(signum, frame):
+    # Perform cleanup tasks here (e.g., closing database connections, saving state, etc.)
+    # ...
+
+    # Exit the application
+    sys.exit(0)
+
+# Register the signal handler for SIGTERM
+signal.signal(signal.SIGTERM, graceful_shutdown)
 
 # CORS
 app.add_middleware(
