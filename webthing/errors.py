@@ -1,7 +1,7 @@
-'''Exception types.'''
+"""Exception types."""
 
 
 class PropertyError(Exception):
-    '''Exception to indicate an issue with a property.'''
+    """Exception to indicate an issue with a property."""
 
     pass

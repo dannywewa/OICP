@@ -6,7 +6,7 @@ from vmbpy import (  # type: ignore
     Stream,
     FrameStatus,
     PixelFormat,
-    CameraEvent
+    CameraEvent,
 )
 import asyncio
 from enum import StrEnum, auto
@@ -178,19 +178,19 @@ class VmbCamera(VmbCameraBase, EventEmitter):
 
         self.cam: Camera
 
-        self.on('camera changed', self.on_camera_changed)
+        self.on("camera changed", self.on_camera_changed)
 
     def camera_changed(self, dev, state):
-        print('camera changed: {}, {}'.format(dev, state))
+        print("camera changed: {}, {}".format(dev, state))
         if state == CameraEvent.Missing:
             asyncio.run(self.close())
         elif state == CameraEvent.Detected:
             # asyncio.run(self.open())
             # asyncio.create_task(self.open_task())
-            self.emit('camera changed', 'Detected')
+            self.emit("camera changed", "Detected")
 
     def interface_changed(self, dev, state):
-        print('interface changed: {}, {}'.format(dev, state))
+        print("interface changed: {}, {}".format(dev, state))
 
     def on_camera_changed(self, d):
         asyncio.run(self.open())
@@ -198,9 +198,9 @@ class VmbCamera(VmbCameraBase, EventEmitter):
     def handler(self, cam: Camera, stream: Stream, frame: Frame):
         if frame.get_status() == FrameStatus.Complete:
             img = frame.as_numpy_ndarray()
-            print('mean: {}'.format(np.mean(img)))
-            print('histo: {}'.format(np.histogram(img, bins=10, range=(0, 1023))))
-            cv2.imwrite(f'capture_{self.id}.png', img)
+            print("mean: {}".format(np.mean(img)))
+            print("histo: {}".format(np.histogram(img, bins=10, range=(0, 1023))))
+            cv2.imwrite(f"capture_{self.id}.png", img)
             self.image_ready_evt.set()
         cam.queue_frame(frame)
 
@@ -209,10 +209,10 @@ class VmbCamera(VmbCameraBase, EventEmitter):
         if not self.is_initialized:
             with self.vmb:
                 self.is_initialized = True
-                print('initialized camera system')
+                print("initialized camera system")
                 await self.shutdown_evt.wait()
                 self.shutdown_evt = asyncio.Event()
-                print('deinitialized camera system')
+                print("deinitialized camera system")
             self.is_armed = False
             self.is_opened = False
             self.is_initialized = False
@@ -226,54 +226,54 @@ class VmbCamera(VmbCameraBase, EventEmitter):
                 cams = self.vmb.get_all_cameras()
                 self.cam = cams[0]
                 # self.opened_evt.set()
-                print('opened')
+                print("opened")
                 self.is_opened = True
-                print('waiting for closed_evt to be set: {}'.format(self.closed_evt))
+                print("waiting for closed_evt to be set: {}".format(self.closed_evt))
 
                 await self.closed_evt.wait()
-                print('closed')
+                print("closed")
                 self.closed_evt = asyncio.Event()
                 print(self.closed_evt)
                 self.is_armed = False
                 self.is_opened = False
 
     async def init(self):
-        print('initializing camera system')
+        print("initializing camera system")
         asyncio.create_task(self.init_task())
 
     async def deinit(self):
-        print('deinitializing camera system')
+        print("deinitializing camera system")
         asyncio.create_task(self.deinit_task())
 
     async def open(self):
-        print('opening')
+        print("opening")
         asyncio.create_task(self.open_task())
 
     async def close(self):
-        print('setting the closed_evt: {}'.format(self.closed_evt))
+        print("setting the closed_evt: {}".format(self.closed_evt))
         self.closed_evt.set()
-        print('closing')
+        print("closing")
 
     async def arm_task(self, input=None):
         if not self.is_armed:
             with self.cam as cam:
-                print('arming software triggering')
+                print("arming software triggering")
                 cam.set_pixel_format(PixelFormat.Mono8)
                 if input:
-                    cam.ExposureTime.set(input['exposure_time_hint'])
-                cam.TriggerSource.set('Software')
-                cam.TriggerSelector.set('FrameStart')
-                cam.TriggerMode.set('On')
-                cam.AcquisitionMode.set('Continuous')
+                    cam.ExposureTime.set(input["exposure_time_hint"])
+                cam.TriggerSource.set("Software")
+                cam.TriggerSelector.set("FrameStart")
+                cam.TriggerMode.set("On")
+                cam.AcquisitionMode.set("Continuous")
 
                 try:
                     cam.start_streaming(self.handler)
-                    print('armed software triggering')
+                    print("armed software triggering")
                     self.is_armed = True
                     await self.disarm_evt.wait()
                 finally:
                     cam.stop_streaming()
-                    print('disarmed software triggering')
+                    print("disarmed software triggering")
                     self.disarm_evt = asyncio.Event()
                     self.is_armed = False
 
@@ -282,7 +282,7 @@ class VmbCamera(VmbCameraBase, EventEmitter):
 
     async def disarm_swtrigger(self):
         self.disarm_evt.set()
-        print('disarming software triggering')
+        print("disarming software triggering")
 
     async def capture0(self, id):
         self.id = id
@@ -296,12 +296,11 @@ class VmbCamera(VmbCameraBase, EventEmitter):
             c.TriggerSoftware.run()
 
     async def capture_swtrigger(self, id, integration_time):
-        '''
+        """
         Software triggering
-        '''
+        """
         self.id = id
         with self.cam as cam:
-
             try:
                 await self.set_integration_time(integration_time)
                 cam.TriggerSoftware.run()

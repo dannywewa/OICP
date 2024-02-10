@@ -4,6 +4,7 @@ from typing import Dict
 
 router = APIRouter()
 
-@router.get('/')
+
+@router.get("/")
 def get_root() -> Dict:
-    return {'hello': 'world'}
+    return {"hello": "world"}

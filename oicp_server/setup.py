@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
-VERSION = '0.1'
+VERSION = "0.1"
 DISTNAME = "oicp_server"
 LICENSE = "Apache 2.0"
 AUTHOR = "Opentrons"
@@ -44,6 +44,7 @@ INSTALL_REQUIRES = [
     "aiosqlite",
     "paho-mqtt",
 ]
+
 
 def read(*parts):
     """

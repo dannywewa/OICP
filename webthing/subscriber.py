@@ -1,4 +1,4 @@
-'''High-level Subscriber base class implementation.'''
+"""High-level Subscriber base class implementation."""
 
 
 class Subscriber:

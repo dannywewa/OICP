@@ -8,11 +8,9 @@ import webthing
 class Thing:
     """A Web Thing."""
 
-    def __init__(self,
-                 id_: str,
-                 title: str,
-                 type_: List[str] = [],
-                 description: str = ''):
+    def __init__(
+        self, id_: str, title: str, type_: List[str] = [], description: str = ""
+    ):
         """
         Initialize the object.
 
@@ -26,7 +24,7 @@ class Thing:
             type_ = [type_]
 
         self.id: str = id_
-        self.context: str = 'https://iot.mozilla.org/schemas'
+        self.context: str = "https://iot.mozilla.org/schemas"
         self.type: List[str] = type_
         self.title: str = title
         self.description: str = description
@@ -36,7 +34,7 @@ class Thing:
         self.actions: Dict = {}
         self.events: List[webthing.Event] = []
         self.subscribers: Set = set()
-        self.href_prefix: str = ''
+        self.href_prefix: str = ""
         self.ui_href = None
 
     def as_thing_description(self):
@@ -46,58 +44,60 @@ class Thing:
         Returns the state as a dictionary.
         """
         thing = {
-            'id': self.id,
-            'title': self.title,
-            '@context': self.context,
-            'properties': self.get_property_descriptions(),
-            'actions': {},
-            'events': {},
-            'links': [
+            "id": self.id,
+            "title": self.title,
+            "@context": self.context,
+            "properties": self.get_property_descriptions(),
+            "actions": {},
+            "events": {},
+            "links": [
                 {
-                    'rel': 'properties',
-                    'href': '{}/properties'.format(self.href_prefix),
+                    "rel": "properties",
+                    "href": "{}/properties".format(self.href_prefix),
                 },
                 {
-                    'rel': 'actions',
-                    'href': '{}/actions'.format(self.href_prefix),
+                    "rel": "actions",
+                    "href": "{}/actions".format(self.href_prefix),
                 },
                 {
-                    'rel': 'events',
-                    'href': '{}/events'.format(self.href_prefix),
+                    "rel": "events",
+                    "href": "{}/events".format(self.href_prefix),
                 },
             ],
         }
 
         for name, action in self.available_actions.items():
-            thing['actions'][name] = action['metadata']
-            thing['actions'][name]['links'] = [
+            thing["actions"][name] = action["metadata"]
+            thing["actions"][name]["links"] = [
                 {
-                    'rel': 'action',
-                    'href': '{}/actions/{}'.format(self.href_prefix, name),
+                    "rel": "action",
+                    "href": "{}/actions/{}".format(self.href_prefix, name),
                 },
             ]
 
         for name, event in self.available_events.items():
-            thing['events'][name] = event['metadata']
-            thing['events'][name]['links'] = [
+            thing["events"][name] = event["metadata"]
+            thing["events"][name]["links"] = [
                 {
-                    'rel': 'event',
-                    'href': '{}/events/{}'.format(self.href_prefix, name),
+                    "rel": "event",
+                    "href": "{}/events/{}".format(self.href_prefix, name),
                 },
             ]
 
         if self.ui_href is not None:
-            thing['links'].append({
-                'rel': 'alternate',
-                'mediaType': 'text/html',
-                'href': self.ui_href,
-            })
+            thing["links"].append(
+                {
+                    "rel": "alternate",
+                    "mediaType": "text/html",
+                    "href": self.ui_href,
+                }
+            )
 
         if self.description:
-            thing['description'] = self.description
+            thing["description"] = self.description
 
         if self.type:
-            thing['@type'] = self.type
+            thing["@type"] = self.type
 
         return thing
 
@@ -106,7 +106,7 @@ class Thing:
         if self.href_prefix:
             return self.href_prefix
 
-        return '/'
+        return "/"
 
     def get_ui_href(self):
         """Get the UI href."""
@@ -181,8 +181,7 @@ class Thing:
 
         Returns the properties as a dictionary, i.e. name -> description.
         """
-        return {k: v.as_property_description()
-                for k, v in self.properties.items()}
+        return {k: v.as_property_description() for k, v in self.properties.items()}
 
     def get_action_descriptions(self, action_name=None):
         """
@@ -215,8 +214,11 @@ class Thing:
         if event_name is None:
             return [e.as_event_description() for e in self.events]
         else:
-            return [e.as_event_description()
-                    for e in self.events if e.get_name() == event_name]
+            return [
+                e.as_event_description()
+                for e in self.events
+                if e.get_name() == event_name
+            ]
 
     def add_property(self, property_):
         """
@@ -266,8 +268,7 @@ class Thing:
 
         Returns a dictionary of property_name -> value.
         """
-        return {prop.get_name(): prop.get_value()
-                for prop in self.properties.values()}
+        return {prop.get_name(): prop.get_value() for prop in self.properties.values()}
 
     def has_property(self, property_name):
         """
@@ -331,8 +332,8 @@ class Thing:
             metadata = {}
 
         self.available_events[name] = {
-            'metadata': metadata,
-            'subscribers': set(),
+            "metadata": metadata,
+            "subscribers": set(),
         }
 
     def create_action(self, action_name, input_=None):
@@ -349,13 +350,13 @@ class Thing:
 
         action_type = self.available_actions[action_name]
 
-        if 'input' in action_type['metadata']:
+        if "input" in action_type["metadata"]:
             try:
-                validate(input_, action_type['metadata']['input'])
+                validate(input_, action_type["metadata"]["input"])
             except ValidationError:
                 return None
 
-        action = action_type['class'](self, input_=input_)
+        action = action_type["class"](self, input_=input_)
         action.set_href_prefix(self.href_prefix)
         self.action_notify(action)
         self.actions[action_name].append(action)
@@ -390,8 +391,8 @@ class Thing:
             metadata = {}
 
         self.available_actions[name] = {
-            'metadata': metadata,
-            'class': cls,
+            "metadata": metadata,
+            "class": cls,
         }
         self.actions[name] = []
 
@@ -423,7 +424,7 @@ class Thing:
         :param subscriber: Subscriber
         """
         if name in self.available_events:
-            self.available_events[name]['subscribers'].add(subscriber)
+            self.available_events[name]["subscribers"].add(subscriber)
 
     def remove_event_subscriber(self, name, subscriber):
         """
@@ -432,9 +433,11 @@ class Thing:
         :param name: Name of the event
         :param subscriber: Subscriber
         """
-        if name in self.available_events and \
-                subscriber in self.available_events[name]['subscribers']:
-            self.available_events[name]['subscribers'].remove(subscriber)
+        if (
+            name in self.available_events
+            and subscriber in self.available_events[name]["subscribers"]
+        ):
+            self.available_events[name]["subscribers"].remove(subscriber)
 
     def property_notify(self, property_):
         """
@@ -463,5 +466,5 @@ class Thing:
         if event.name not in self.available_events:
             return
 
-        for subscriber in self.available_events[event.name]['subscribers']:
+        for subscriber in self.available_events[event.name]["subscribers"]:
             subscriber.update_event(event)
