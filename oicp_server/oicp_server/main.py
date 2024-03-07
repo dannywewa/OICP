@@ -13,14 +13,14 @@ from .settings import get_settings
 from .service import initialize_logging
 from .hardware import initialize_hardware, cleanup_hardware
 
-__version__ = '0.0.1'
+__version__ = "0.0.1"
 exception_handlers = None
 
 log = logging.getLogger(__name__)
 
 
-def startup(app: FastAPI) -> None:
-    '''Handle app startup'''
+def startup() -> None:
+    """Handle app startup"""
 
     print('startup')
     settings = get_settings()
@@ -34,8 +34,8 @@ def startup(app: FastAPI) -> None:
     pass
 
 
-def shutdown(app: FastAPI):
-    '''Handle app shutdown'''
+def shutdown():
+    """Handle app shutdown"""
 
     print('shutdown')
     # cleanup_notification()
@@ -55,11 +55,11 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title='OICP HTTP API Spec',
-    description='This OpenAPI spec describes the HTTP API of the OICP Server.',
+    title="OICP HTTP API Spec",
+    description="This OpenAPI spec describes the HTTP API of the OICP Server.",
     version=__version__,
     lifespan=lifespan,
-    exception_handlers=exception_handlers
+    exception_handlers=exception_handlers,
 )
 
 
@@ -77,10 +77,10 @@ signal.signal(signal.SIGTERM, graceful_shutdown)
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=('*'),
+    allow_origins=("*"),
     allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-    
+
 app.include_router(router=router)

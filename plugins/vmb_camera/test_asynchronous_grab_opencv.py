@@ -51,23 +51,25 @@ opencv_display_format = PixelFormat.Bgr8
 
 
 def print_preamble():
-    print('///////////////////////////////////////////////////')
-    print('/// VmbPy Asynchronous Grab with OpenCV Example ///')
-    print('///////////////////////////////////////////////////\n')
+    print("///////////////////////////////////////////////////")
+    print("/// VmbPy Asynchronous Grab with OpenCV Example ///")
+    print("///////////////////////////////////////////////////\n")
 
 
 def print_usage():
-    print('Usage:')
-    print('    python asynchronous_grab_opencv.py [camera_id]')
-    print('    python asynchronous_grab_opencv.py [/h] [-h]')
+    print("Usage:")
+    print("    python asynchronous_grab_opencv.py [camera_id]")
+    print("    python asynchronous_grab_opencv.py [/h] [-h]")
     print()
-    print('Parameters:')
-    print('    camera_id   ID of the camera to use (using first camera if not specified)')
+    print("Parameters:")
+    print(
+        "    camera_id   ID of the camera to use (using first camera if not specified)"
+    )
     print()
 
 
 def abort(reason: str, return_code: int = 1, usage: bool = False):
-    print(reason + '\n')
+    print(reason + "\n")
 
     if usage:
         print_usage()
@@ -80,7 +82,7 @@ def parse_args() -> Optional[str]:
     argc = len(args)
 
     for arg in args:
-        if arg in ('/h', '-h'):
+        if arg in ("/h", "-h"):
             print_usage()
             sys.exit(0)
 
@@ -97,12 +99,12 @@ def get_camera(camera_id: Optional[str]) -> Camera:
                 return vmb.get_camera_by_id(camera_id)
 
             except VmbCameraError:
-                abort('Failed to access Camera \'{}\'. Abort.'.format(camera_id))
+                abort("Failed to access Camera '{}'. Abort.".format(camera_id))
 
         else:
             cams = vmb.get_all_cameras()
             if not cams:
-                abort('No Cameras accessible. Abort.')
+                abort("No Cameras accessible. Abort.")
 
             return cams[0]
 
@@ -111,14 +113,14 @@ def setup_camera(cam: Camera):
     with cam:
         # Enable auto exposure time setting if camera supports it
         try:
-            cam.ExposureAuto.set('Continuous')
+            cam.ExposureAuto.set("Continuous")
 
         except (AttributeError, VmbFeatureError):
             pass
 
         # Enable white balancing if camera supports it
         try:
-            cam.BalanceWhiteAuto.set('Continuous')
+            cam.BalanceWhiteAuto.set("Continuous")
 
         except (AttributeError, VmbFeatureError):
             pass
@@ -138,12 +140,18 @@ def setup_pixel_format(cam: Camera):
     # Query available pixel formats. Prefer color formats over monochrome formats
     cam_formats = cam.get_pixel_formats()
     cam_color_formats = intersect_pixel_formats(cam_formats, COLOR_PIXEL_FORMATS)
-    convertible_color_formats = tuple(f for f in cam_color_formats
-                                      if opencv_display_format in f.get_convertible_formats())
+    convertible_color_formats = tuple(
+        f
+        for f in cam_color_formats
+        if opencv_display_format in f.get_convertible_formats()
+    )
 
     cam_mono_formats = intersect_pixel_formats(cam_formats, MONO_PIXEL_FORMATS)
-    convertible_mono_formats = tuple(f for f in cam_mono_formats
-                                     if opencv_display_format in f.get_convertible_formats())
+    convertible_mono_formats = tuple(
+        f
+        for f in cam_mono_formats
+        if opencv_display_format in f.get_convertible_formats()
+    )
 
     # if OpenCV compatible color format is supported directly, use that
     if opencv_display_format in cam_formats:
@@ -158,7 +166,7 @@ def setup_pixel_format(cam: Camera):
         cam.set_pixel_format(convertible_mono_formats[0])
 
     else:
-        abort('Camera does not support an OpenCV compatible format. Abort.')
+        abort("Camera does not support an OpenCV compatible format. Abort.")
 
 
 class Handler:
@@ -170,7 +178,7 @@ class Handler:
 
     def __call__(self, cam: Camera, stream: Stream, frame: Frame):
         if frame.get_status() == FrameStatus.Complete:
-            print('{} acquired {}'.format(cam, frame), flush=True)
+            print("{} acquired {}".format(cam, frame), flush=True)
 
             # Convert frame if it is not already the correct format
             if frame.get_pixel_format() == opencv_display_format:
@@ -200,8 +208,9 @@ def main():
                 # Start Streaming with a custom a buffer of 10 Frames (defaults to 5)
                 cam.start_streaming(handler=handler, buffer_count=10)
 
-                msg = 'Stream from \'{}\'. Press <Enter> to stop stream.'
+                msg = "Stream from '{}'. Press <Enter> to stop stream."
                 import cv2
+
                 ENTER_KEY_CODE = 13
                 while True:
                     key = cv2.waitKey(1)
@@ -216,5 +225,5 @@ def main():
                 cam.stop_streaming()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -2,8 +2,9 @@ import logging
 from logging.config import dictConfig
 from typing import Any, Dict
 
+
 def initialize_logging() -> None:
-    '''Initialize logging'''
+    """Initialize logging"""
 
     level = logging._nameToLevel.get(logging.INFO, logging.INFO)
 
@@ -11,13 +12,15 @@ def initialize_logging() -> None:
 
     dictConfig(c)
 
+
 class _LogBelow:
     def __init__(self, level: int) -> None:
         self._log_below_level = level
 
     def __call__(self, record: logging.LogRecord) -> bool:
         return record.levelno < self._log_below_level
-    
+
+
 def _robot_log_config(log_level: int) -> Dict[str, Any]:
     return {
         "version": 1,

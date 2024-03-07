@@ -1,1 +1,1 @@
-'''Hardware sensors'''
+"""Hardware sensors"""

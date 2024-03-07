@@ -1,1 +1,1 @@
-'''Hardware instruments'''
+"""Hardware instruments"""

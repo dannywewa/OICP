@@ -6,9 +6,10 @@ name = "pypi"
 [packages]
 fastapi = "*"
 setuptools = "*"
-# vmbpy = {path = "/opt/VimbaX_2023-4/api/python/vmbpy-1.0.4-py3-none-any.whl"}
-oicp-hardware = {file = "oicp_hardware", editable = true}
-oicp-server = {file = "oicp_server", editable = true}
+ruff = "*"
+vmbpy = {path = "/opt/VimbaX_2023-4/api/python/vmbpy-1.0.4-py3-none-any.whl"}
+opentrons-hardware = {editable = true, path = "./oicp_hardware"}
+oicp-server = {editable = true, path = "./oicp_server"}
 
 [dev-packages]
 
